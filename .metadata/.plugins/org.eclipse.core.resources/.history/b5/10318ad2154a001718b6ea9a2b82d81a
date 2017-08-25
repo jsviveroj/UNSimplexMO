@@ -1,0 +1,19 @@
+Dantzig
+
+	variabilis
+		x
+		y
+	maximieren
+		50x+80y
+		
+	cortapisa
+		x + 2y <= 120
+		x + y <= 90
+	fines
+		x >=0
+		y >=0
+	++Vector
+		50x+80y	
+
+		
+MayoDe2005

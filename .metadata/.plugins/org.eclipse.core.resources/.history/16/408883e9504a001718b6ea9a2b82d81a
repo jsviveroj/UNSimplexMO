@@ -1,0 +1,191 @@
+
+package com.simplex.interprete;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
+import org.antlr.runtime.tree.TreeWizard.Visitor;
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+
+public class Main {
+
+	private static final String EXTENSION = "smp";
+
+	public static void main(String[] args) throws IOException {
+		String program = args.length > 1 ? args[1] : "test/test." + EXTENSION;
+
+		System.out.println("Interpreting file " + program);
+
+		SimplexLexer lexer = new SimplexLexer(new ANTLRFileStream(program));
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		SimplexParser parser = new SimplexParser(tokens);
+		SimplexParser.ProgramContext tree = parser.program();
+		SimplexCustomVisitor visitor = new SimplexCustomVisitor();
+		visitor.visit(tree);
+		
+		if (visitor.symbolTableO.size() > 1) {
+			for (int i = 0; i < visitor.symbolTableO.size(); i++) {
+				singleSimplex(visitor,i);
+			}
+			Float[][] paymentMatrix = new Float [visitor.symbolTableO.size()][visitor.symbolTableO.size()];
+			createPaymentMatrix(visitor,paymentMatrix);
+			createS(visitor);
+			System.out.println(visitor.allZs);
+			System.out.println(visitor.minPaymentM);
+			System.out.println(visitor.allOCoefs);
+		}else{
+			singleSimplex(visitor,0);
+		}
+
+		System.out.println("Interpretation finished");
+	}
+	
+	public static void  singleSimplex(SimplexCustomVisitor visitor,int index){
+		for (int j = 0; j < visitor.symbolTableR.size(); j++) {
+			String line= visitor.lineA(visitor.symbolTableR.get(j));
+			//System.out.println(line);
+			String [] lines= line.split("[+]");
+			ArrayList<Float> actualLine = new ArrayList<Float>();
+			for (int i = 0; i < lines.length; i++) {
+				actualLine.add(Float.parseFloat(lines[i]));
+			}
+			visitor.Matrix.add(actualLine);
+		}
+		int maxSize = visitor.Matrix.get(0).size();
+		for (int i = 0; i < visitor.Matrix.size(); i++) {
+			int actualSize=visitor.Matrix.get(i).size();
+			if (maxSize < actualSize) {
+				maxSize=actualSize;
+			}
+		}
+		for (int i = 0; i < visitor.Matrix.size(); i++) {
+			int actualSize=visitor.Matrix.get(i).size();
+			ArrayList<Float> actualLine = visitor.Matrix.get(i);
+			if (actualSize < maxSize) {
+				for (int j = actualSize; j < maxSize; j++) {
+					actualLine.add(actualLine.size()-1,(float)0);
+				}
+			}
+			//System.out.println(actualLine);
+			visitor.Matrix1.add(actualLine);
+		}
+		visitor.lineO(visitor.symbolTableO.get(index));
+		
+		
+		
+		float [][] M =  new float[visitor.Matrix1.size()][];
+		
+		for (int i = 0; i < visitor.Matrix1.size(); i++) {
+			ArrayList<Float> row = visitor.Matrix1.get(i);
+			float[] copy = new float[row.size()];
+			for (int j = 0; j < row.size(); j++) {
+				copy[j]=row.get(j);
+			}
+			M[i]=copy;
+		}
+		boolean quit = false;
+		//System.out.println(Arrays.deepToString(M));
+		Simplex simplex = new Simplex(visitor.symbolTableR.size(),visitor.symbolTableV.size()+visitor.symbolTableHol.size());
+		simplex.fillTable(M);
+		for (int i = 0; i < visitor.symbolTableV.size(); i++) {
+			simplex.inOutBaseVariables.put(i, -1);
+		}
+        // print it out
+        System.out.println("---Matriz Inicial---");
+        simplex.print();
+
+        // if table is not optimal re-iterate
+        while(!quit){
+            Simplex.ERROR err = simplex.compute(visitor.symbolTableV.size());
+
+            if(err == Simplex.ERROR.IS_OPTIMAL){
+                System.out.println("---Matriz Final---");
+                simplex.print();
+                quit = true;
+            }
+            else if(err == Simplex.ERROR.UNBOUNDED){
+                System.out.println("---Solution is unbounded---");
+                quit = true;
+            }
+        }
+        
+        
+        
+        //Elige el valor de cada variable
+        int [] rowIndex= new int [visitor.symbolTableV.size()];
+        
+        for (int i = 0; i < simplex.rows; i++) {
+			for (int j = 0; j < visitor.symbolTableV.size(); j++) {
+				if (simplex.table[i][j]==1 ) {
+					rowIndex[j]=i;
+				}
+			}
+		}
+        int l =simplex.table[0].length;
+        int l1=simplex.table.length;
+        ArrayList<Float> setOfVs = new ArrayList<Float>(); 
+        for (int i = 0; i < simplex.inOutBaseVariables.size(); i++) {
+        	if (simplex.inOutBaseVariables.get(i) == -1) {
+        		System.out.println(visitor.symbolTableV.get(i)+": 0.0");
+        		setOfVs.add((float) 0);
+        		
+    		}else{
+    			System.out.println(visitor.symbolTableV.get(i)+": "+simplex.table[rowIndex[i]][l-1]);
+    			setOfVs.add((float) simplex.table[rowIndex[i]][l-1]);
+    		}
+        }
+        visitor.allVs.add(setOfVs);
+
+        
+        //Elige el valor de Z
+        if (visitor.symbolTableMaxOrMin.get(0).equals("minimieren")) {
+        	System.out.println("Z: "+-simplex.table[l1-1][l-1]);
+        	visitor.allZs.add(-simplex.table[l1-1][l-1]);
+		}else{
+			System.out.println("Z: "+simplex.table[l1-1][l-1]);
+			visitor.allZs.add(simplex.table[l1-1][l-1]);
+		}
+        visitor.Matrix.clear();
+        visitor.Matrix1.clear();
+        visitor.Matrix2.clear();
+        visitor.symbolTableHol.clear();
+        System.out.println("********************************************************************************************************");
+	}
+	public static void  createPaymentMatrix(SimplexCustomVisitor visitor,Float[][] paymentMatrix ){
+		int sz = visitor.allOCoefs.size();
+		ArrayList<Float> min = new ArrayList<>(Collections.nCopies(sz, Float.MAX_VALUE));
+		for (int i=0; i < sz ; i++) {
+			for (int j=0; j < sz ; j++) {
+				ArrayList t5 = visitor.allVs.get(i);
+				ArrayList t6 = visitor.allOCoefs.get(j);
+				ArrayList<Float> aws = new ArrayList<>();
+				for (int k=0; k < visitor.allVs.size(); k++) {
+					aws.add((float)t5.get(k)*(float)t6.get(k));
+				}
+				Float answer = (float) 0.0;
+				for (int k=0; k < aws.size(); k++) {
+					answer += (float) aws.get(k);
+				}
+				Float tm = (float)min.get(j);
+				if (answer < tm) {
+					min.set(j,answer);
+				}
+				paymentMatrix[i][j] = answer;
+			}
+		}
+		visitor.minPaymentM = (ArrayList<Float>) min.clone();
+		//System.out.println(Arrays.deepToString(paymentMatrix));
+	}
+	public static String createS(SimplexCustomVisitor visitor){
+		String result = "";
+		for (int i = 0; i < visitor.minPaymentM.size(); i++) {
+			Float first = visitor.allZs.get(i);
+			Float second = visitor.minPaymentM.get(i);
+			visitor.differences.add(first-second);
+		}
+		System.out.println(visitor.differences);
+		return result;
+	}
+}

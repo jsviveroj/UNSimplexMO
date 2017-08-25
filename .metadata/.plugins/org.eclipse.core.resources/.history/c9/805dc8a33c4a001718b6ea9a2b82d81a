@@ -1,0 +1,18 @@
+Dantzig
+
+	variabilis
+		x
+		y
+	maximieren
+		10x-3y
+	cortapisa
+		x + y <= 130
+		2.5x + y <= 250
+	fines
+		x >=0
+		y >=0
+	Goicochea
+		0.8x+1.3y	
+
+		
+MayoDe2005

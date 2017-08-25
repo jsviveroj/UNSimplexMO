@@ -1,0 +1,17 @@
+Dantzig
+
+	variabilis
+		x
+		y
+	maximieren
+		x+2y
+	cortapisa
+		x + y <= 4
+		x <= 3
+		-x + y <= 3
+	fines
+		x >=0
+		y >=0
+
+		
+MayoDe2005

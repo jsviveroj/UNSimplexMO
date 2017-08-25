@@ -1,0 +1,33 @@
+
+package com.simplex.interprete;
+import java.io.IOException;
+
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+
+public class Main {
+
+	private static final String EXTENSION = "smp";
+
+	public static void main(String[] args) throws IOException {
+		String program = args.length > 1 ? args[1] : "test/test." + EXTENSION;
+
+		System.out.println("Interpreting file " + program);
+
+		SimplexLexer lexer = new SimplexLexer(new ANTLRFileStream(program));
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		SimplexParser parser = new SimplexParser(tokens);
+		SimplexParser.ProgramContext tree = parser.program();
+		SimplexCustomVisitor visitor = new SimplexCustomVisitor();
+		visitor.visit(tree);
+		
+		for (int j = 0; j < visitor.symbolTableR.size(); j++) {
+			System.out.println(visitor.lineA(visitor.symbolTableR.get(j)));
+		}
+		System.out.println(visitor.symbolTableHol.size());
+		
+		System.out.println("Interpretation finished");
+
+	}
+
+}

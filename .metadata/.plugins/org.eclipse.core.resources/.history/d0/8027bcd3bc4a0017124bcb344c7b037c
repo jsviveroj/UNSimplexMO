@@ -1,0 +1,16 @@
+Dantzig
+
+	variabilis
+		x
+		y
+	maximieren
+		6x+10y
+	cortapisa
+		6x + 2y <= 36
+		x  <= 8
+		y <= 12
+	fines
+		x >=0
+		y >=0
+
+MayoDe2005

@@ -1,0 +1,18 @@
+Dantzig
+
+	variabilis
+		x
+		y
+		z
+	maximieren
+		6x+5y+4z
+	cortapisa
+		2x + 2y + z <= 90
+		x + 3y + 2z <= 150
+		2x + y +2z <= 120
+	fines
+		x >=0
+		y >=0
+		z >=0
+
+MayoDe2005

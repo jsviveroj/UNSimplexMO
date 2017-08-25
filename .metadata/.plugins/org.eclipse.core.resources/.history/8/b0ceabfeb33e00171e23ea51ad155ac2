@@ -1,0 +1,18 @@
+Dantzig
+
+	variabilis
+		x
+		y
+		
+	maximieren
+		3x+5y
+		
+	cortapisa
+		-x + y = 4
+		x + 3y = 6
+	fines
+		y >=0
+		x >=0	
+
+		
+MayoDe2005

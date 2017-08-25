@@ -1,0 +1,59 @@
+Dantzig
+
+	variabilis
+		x
+		y
+	maximieren
+		50x+80y
+	cortapisa
+		x + 2y <= 120
+		x + y <= 90
+	fines
+		x >=0
+		y >=0
+
+MayoDe2005
+
+
+Dantzig
+
+	variabilis
+		x
+		y
+		v
+	maximieren
+		6x+5y+4z
+	cortapisa
+		2x + 2y + v <= 90
+		x + 3y + 2v <= 150
+		2x + y +2v <= 120
+	fines
+		x >=0
+		y >=0
+		v >=0
+
+MayoDe2005
+
+
+
+Dantzig
+
+	variabilis
+		x
+		y
+	maximieren
+		10x+3y
+	cortapisa
+		x + y <= 130
+		2.5x + y <= 250
+	fines
+		x >=0
+		y >=0
+	Goicochea
+		0.8x+1.3y	
+
+		
+MayoDe2005
+
+
+

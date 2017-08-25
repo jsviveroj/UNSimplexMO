@@ -1,0 +1,17 @@
+Dantzig
+
+	variabilis
+		x
+		y
+	maximieren
+		450x+560y
+	cortapisa
+		150x + 200y <= 200000
+		100x + 100y <= 130000
+		80x + 100y <= 104000
+		x + y <= 1200
+	fines
+		x >=0
+		y >=0
+	
+MayoDe2005

@@ -1,0 +1,79 @@
+grammar Simplex;
+
+@parser::header{
+
+}
+
+@parser::members{
+
+}
+
+program: BEGIN 
+	problem 
+	other*
+END;
+
+other: MFUNCTIONS  function;
+
+problem: VAR variables+ objective function RES restric* LIM bounds*;
+
+variables: ID #Variable;
+
+
+
+objective: MAX|MIN #Objective;
+
+function: fItem (operator item)* #Func;
+
+item:
+	 FLOAT ID
+	|ID
+	|FLOAT
+	;
+	
+fItem:
+	operator? item;
+	
+operator: MAS|MENOS;
+
+restric: function lComparation operator? FLOAT #Res;
+
+lComparation: LE|GE|EQ;
+lComp: LE|GE;
+
+bounds:
+	 ID lComp FLOAT
+	| FLOAT lComp ID
+	| FLOAT lComp ID lComp FLOAT
+;
+
+
+MAX: 'maximieren';
+MIN: 'minimieren';
+RES: 'cortapisa';
+VAR: 'variabilis';
+LIM: 'fines';
+
+MAS: '+';
+MENOS: '-';
+MULT: '*';
+DIV: '/';
+
+GT: '>';
+LT: '<';
+LE: '<=';
+GE: '>=';
+EQ: '=';
+COMA: ',';
+
+BEGIN: 'Dantzig';
+END: 'MayoDe2005' ;
+MFUNCTIONS: 'Goicochea';
+
+ID: [a-zA-Z_][a-zA-Z0-9_]*;
+FLOAT : ([0-9])+ ('.' ([0-9])+(('e' | 'E')('+'|'-')?([0-9])+)?)?;
+
+WS:[ \t\r\n]+ -> skip;
+
+
+
